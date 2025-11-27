@@ -16,22 +16,28 @@ type CreateCarRequest struct {
 }
 
 type CarResponseDto struct {
-	ID          int64     `json:"id"`
-	Brand       string    `json:"brand"`
-	Model       string    `json:"model"`
-	Year        time.Time `json:"year"`
-	RentalPrice int64     `json:"rentalPrice"`
-	ImageUrl    *string   `json:"imageUrl"`
-	CreatedAt   time.Time `json:"createdAt"`
-	UpdatedAt   time.Time `json:"updatedAt"`
+	ID          int64      `json:"id"`
+	Brand       string     `json:"brand"`
+	Model       string     `json:"model"`
+	Year        time.Time  `json:"year"`
+	RentalPrice int64      `json:"rentalPrice"`
+	ImageUrl    *string    `json:"imageUrl"`
+	CreatedAt   time.Time  `json:"createdAt"`
+	UpdatedAt   *time.Time `json:"updatedAt"`
 }
 
 func CarToResponseDto(c *car_model.CarModel) *CarResponseDto {
 	var imageUrl *string
+	var updatedAt *time.Time
 	if c.ImageUrl.Valid {
 		imageUrl = &c.ImageUrl.String
 	} else {
 		imageUrl = nil
+	}
+	if c.UpdatedAt.Valid {
+		updatedAt = &c.UpdatedAt.Time
+	} else {
+		updatedAt = nil
 	}
 
 	return &CarResponseDto{
@@ -42,7 +48,7 @@ func CarToResponseDto(c *car_model.CarModel) *CarResponseDto {
 		RentalPrice: c.RentalPrice,
 		ImageUrl:    imageUrl,
 		CreatedAt:   c.CreatedAt,
-		UpdatedAt:   c.UpdatedAt,
+		UpdatedAt:   updatedAt,
 	}
 }
 

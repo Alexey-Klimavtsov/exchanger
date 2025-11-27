@@ -1,6 +1,7 @@
 package car_handlers
 
 import (
+	"fmt"
 	"github.com/asaipov/gorenda/internal/http/dto/car_dto"
 	helpers "github.com/asaipov/gorenda/internal/http/helpers"
 
@@ -20,7 +21,7 @@ func (h *CarHandlers) CreateNewCar(c *gin.Context) {
 	var req car_dto.CreateCarRequest
 
 	if err := c.ShouldBindJSON(&req); err != nil {
-		helpers.HandleError(c, err)
+		helpers.HandleError(c, fmt.Errorf("%w %v", helpers.ErrBinding, req))
 		return
 	}
 
@@ -37,13 +38,13 @@ func (h *CarHandlers) CreateNewCar(c *gin.Context) {
 func (h *CarHandlers) UpdateCar(c *gin.Context) {
 	queryId, err := helpers.GetIdFromQuery(c)
 	if err != nil {
-		helpers.HandleError(c, err)
+		helpers.HandleError(c, fmt.Errorf("%w", helpers.ErrReadingId))
 		return
 	}
 
 	var req car_dto.CreateCarRequest
 	if bindErr := c.ShouldBindJSON(&req); bindErr != nil {
-		helpers.HandleError(c, bindErr)
+		helpers.HandleError(c, fmt.Errorf("%w %v", helpers.ErrBinding, req))
 		return
 	}
 
@@ -55,13 +56,13 @@ func (h *CarHandlers) UpdateCar(c *gin.Context) {
 		return
 	}
 
-	helpers.WriteCreated(c, car_dto.CarToResponseDto(car))
+	helpers.WriteOK(c, car_dto.CarToResponseDto(car))
 }
 
 func (h *CarHandlers) DeleteCar(c *gin.Context) {
 	queryId, err := helpers.GetIdFromQuery(c)
 	if err != nil {
-		helpers.HandleError(c, err)
+		helpers.HandleError(c, fmt.Errorf("%w", helpers.ErrReadingId))
 		return
 	}
 
@@ -77,7 +78,7 @@ func (h *CarHandlers) DeleteCar(c *gin.Context) {
 func (h *CarHandlers) GetCarById(c *gin.Context) {
 	queryId, err := helpers.GetIdFromQuery(c)
 	if err != nil {
-		helpers.HandleError(c, err)
+		helpers.HandleError(c, fmt.Errorf("%w", helpers.ErrReadingId))
 		return
 	}
 

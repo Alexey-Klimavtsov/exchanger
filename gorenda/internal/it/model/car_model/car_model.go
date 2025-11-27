@@ -14,7 +14,7 @@ type CarModel struct {
 	RentalPrice int64          `json:"rentalPrice"`
 	ImageUrl    sql.NullString `json:"imageUrl"`
 	CreatedAt   time.Time      `json:"createdAt"`
-	UpdatedAt   time.Time      `json:"updatedAt"`
+	UpdatedAt   sql.NullTime   `json:"updatedAt"`
 }
 
 func (m *CarModel) Validate() error {

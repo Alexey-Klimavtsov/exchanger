@@ -46,7 +46,7 @@ func (s *carService) CreateNewCar(ctx context.Context, car *CreateCarInput) (*ca
 	c, err := carToModel(car)
 
 	if err != nil {
-		return nil, fmt.Errorf("%w", ErrInvalidInput)
+		return nil, fmt.Errorf("%w: %v", ErrInvalidInput, err)
 	}
 
 	return s.repo.CreateNewCar(ctx, c)
@@ -56,7 +56,7 @@ func (s *carService) UpdateCar(ctx context.Context, car *CreateCarInput, id int6
 	c, err := carToModel(car)
 
 	if err != nil {
-		return nil, fmt.Errorf("%w", ErrInvalidInput)
+		return nil, fmt.Errorf("%w: %v", ErrInvalidInput, err)
 	}
 
 	return s.repo.UpdateCar(ctx, c, id)
@@ -64,7 +64,7 @@ func (s *carService) UpdateCar(ctx context.Context, car *CreateCarInput, id int6
 
 func (s *carService) GetCarById(ctx context.Context, id int64) (*car_model.CarModel, error) {
 	if id <= 0 {
-		return nil, fmt.Errorf("%w: id is negative", ErrInvalidInput)
+		return nil, fmt.Errorf("%w: id is negative %v", ErrInvalidInput, id)
 	}
 
 	return s.repo.GetCarById(ctx, id)
@@ -72,7 +72,7 @@ func (s *carService) GetCarById(ctx context.Context, id int64) (*car_model.CarMo
 
 func (s *carService) DeleteCar(ctx context.Context, id int64) (deletedId int64, err error) {
 	if id <= 0 {
-		return 0, fmt.Errorf("%w: id is negative", ErrInvalidInput)
+		return 0, fmt.Errorf("%w: id is negative %v", ErrInvalidInput, id)
 	}
 
 	return s.repo.DeleteCar(ctx, id)

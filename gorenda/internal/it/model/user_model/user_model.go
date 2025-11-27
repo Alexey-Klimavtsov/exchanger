@@ -3,19 +3,22 @@ package user_model
 import (
 	"database/sql"
 	"fmt"
+	"github.com/asaipov/gorenda/internal/it/model/driver_license_model"
 	"time"
 )
 
 type UserModel struct {
-	ID             int64          `json:"id"`
-	FirstName      string         `json:"firstName"`
-	LastName       string         `json:"lastName"`
-	Surname        sql.NullString `json:"surname"`
-	IsAdmin        bool           `json:"isAdmin"`
-	RightsCategory sql.NullString `json:"rightsCategory"`
-	Birthday       time.Time      `json:"birthday"`
-	CreatedAt      time.Time      `json:"createdAt"`
-	UpdatedAt      time.Time      `json:"updatedAt"`
+	ID             int64                                      `json:"id"`
+	FirstName      string                                     `json:"firstName"`
+	LastName       string                                     `json:"lastName"`
+	Email          string                                     `json:"email"`
+	Surname        sql.NullString                             `json:"surname"`
+	IsAdmin        bool                                       `json:"isAdmin"`
+	RightsCategory []*driver_license_model.DriverLicenseModel `json:"rightsCategory"`
+	Birthday       time.Time                                  `json:"birthday"`
+	DeletedAt      time.Time                                  `json:"deletedAt"`
+	CreatedAt      time.Time                                  `json:"createdAt"`
+	UpdatedAt      sql.NullTime                               `json:"updatedAt"`
 }
 
 func (m *UserModel) Validate() error {

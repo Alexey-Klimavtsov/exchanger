@@ -25,7 +25,7 @@ func WriteCreated(c *gin.Context, payload any) {
 	c.JSON(http.StatusCreated, gin.H{"response": payload})
 }
 
-func WriteOK(c *gin.Context, payload any) { c.JSON(http.StatusOK, payload) }
+func WriteOK(c *gin.Context, payload any) { c.JSON(http.StatusOK, gin.H{"response": payload}) }
 
 func GetIdFromQuery(c *gin.Context) (int64, error) {
 	queryId := c.Param("id")
@@ -49,5 +49,5 @@ func HandleError(c *gin.Context, err error) {
 		}
 	}
 
-	c.JSON(http.StatusBadRequest, gin.H{"error": err.Error(), "code": http.StatusBadRequest})
+	c.JSON(http.StatusInternalServerError, gin.H{"error": "Oops.. Something went wrong", "code": http.StatusBadRequest})
 }

@@ -4,7 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"github.com/asaipov/gorenda/internal/it/model/car_model"
-	"github.com/asaipov/gorenda/internal/repo/helpers"
+	"github.com/asaipov/gorenda/internal/service/car_service"
 	"time"
 )
 
@@ -27,7 +27,7 @@ func (r *CarRepo) CreateNewCar(ctx context.Context, car *car_model.CarModel) (*c
 	res, err := r.db.ExecContext(ctx, q, c.Brand, c.Model, c.Year, c.RentalPrice, imageUrl, now)
 
 	if err != nil {
-		return nil, helpers.MapSQLiteError(err)
+		return nil, car_service.ErrCreate
 	}
 
 	c.CreatedAt = now
@@ -38,37 +38,65 @@ func (r *CarRepo) CreateNewCar(ctx context.Context, car *car_model.CarModel) (*c
 func (r *CarRepo) UpdateCar(ctx context.Context, car *car_model.CarModel, id int64) (*car_model.CarModel, error) {
 	now := time.Now().UTC()
 	var c = car
+
 	const q = `UPDATE cars
-	SET brand = ?,
-    model = ?,
-    year = ?,
-    rental_price = ?,
-    image_url = ?,
-    updated_at = ?
-WHERE id = ?
-`
-	var imageUrl string
+		SET brand = ?,
+		    model = ?,
+		    year = ?,
+		    rental_price = ?,
+		    image_url = ?,
+		    updated_at = ?
+		WHERE id = ?`
+
+	var imageUrl sql.NullString
 	if c.ImageUrl.Valid {
-		imageUrl = c.ImageUrl.String
+		imageUrl = sql.NullString{
+			String: c.ImageUrl.String,
+			Valid:  true,
+		}
+	} else {
+		imageUrl = sql.NullString{
+			String: "",
+			Valid:  false,
+		}
 	}
-	_, err := r.db.ExecContext(ctx, q, c.Brand, c.Model, c.Year, c.RentalPrice, imageUrl, now, id)
 
+	res, err := r.db.ExecContext(ctx, q,
+		c.Brand,
+		c.Model,
+		c.Year,
+		c.RentalPrice,
+		imageUrl.String,
+		now,
+		id,
+	)
 	if err != nil {
-		return nil, helpers.MapSQLiteError(err)
+		return nil, car_service.ErrUpdate
 	}
 
-	c.UpdatedAt = now
+	affected, _ := res.RowsAffected()
+	if affected == 0 {
+		return nil, car_service.ErrNotFound
+	}
+
+	c.ID = id
+	c.UpdatedAt = sql.NullTime{Time: now, Valid: true}
 
 	return c, nil
 }
+
 func (r *CarRepo) GetCarById(ctx context.Context, id int64) (*car_model.CarModel, error) {
 	const q = `SELECT brand, model, year, rental_price, image_url, created_at, updated_at, id FROM cars WHERE id = ?`
 	row := r.db.QueryRowContext(ctx, q, id)
 	var c car_model.CarModel
 	var imageUrl sql.NullString
+
 	if err := row.Scan(&c.Brand, &c.Model, &c.Year, &c.RentalPrice, &imageUrl, &c.CreatedAt, &c.UpdatedAt, &c.ID); err != nil {
-		return nil, helpers.MapSQLiteError(err)
+		return nil, car_service.ErrDataReading
 	}
+
+	c.ImageUrl = imageUrl
+
 	return &c, nil
 }
 func (r *CarRepo) DeleteCar(ctx context.Context, id int64) (deletedId int64, err error) {
@@ -76,12 +104,12 @@ func (r *CarRepo) DeleteCar(ctx context.Context, id int64) (deletedId int64, err
 
 	res, err := r.db.ExecContext(ctx, q, id)
 	if err != nil {
-		return 0, err
+		return 0, car_service.ErrDelete
 	}
 
 	affected, _ := res.RowsAffected()
 	if affected == 0 {
-		return 0, sql.ErrNoRows
+		return 0, car_service.ErrNotFound
 	}
 
 	return id, nil

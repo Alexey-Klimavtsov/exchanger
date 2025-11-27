@@ -4,7 +4,11 @@ import (
 	"context"
 	"github.com/asaipov/gorenda/internal/app/cache"
 	"github.com/asaipov/gorenda/internal/http/handlers/car_handlers"
+	"github.com/asaipov/gorenda/internal/http/handlers/driver_license_handlers"
+	"github.com/asaipov/gorenda/internal/http/handlers/user_handlers"
 	"github.com/asaipov/gorenda/internal/service/car_service"
+	"github.com/asaipov/gorenda/internal/service/driver_license_service"
+	"github.com/asaipov/gorenda/internal/service/user_service"
 	"github.com/gin-gonic/gin"
 	swaggerFiles "github.com/swaggo/files"
 	ginSwagger "github.com/swaggo/gin-swagger"
@@ -13,12 +17,14 @@ import (
 )
 
 type Server struct {
-	carsService car_service.CarService
-	router      *gin.Engine
+	carsService          car_service.CarService
+	driverLicenseService driver_license_service.DriverLicenseService
+	userService          user_service.UserService
+	router               *gin.Engine
 }
 
-func NewServer(carsService car_service.CarService) *Server {
-	s := &Server{carsService: carsService}
+func NewServer(carsService car_service.CarService, driverLicenseService driver_license_service.DriverLicenseService, userService user_service.UserService) *Server {
+	s := &Server{carsService: carsService, driverLicenseService: driverLicenseService, userService: userService}
 	s.setupRouter()
 	return s
 }
@@ -33,6 +39,8 @@ func (s *Server) setupRouter() {
 	r.Use(withTimeout(30 * time.Second))
 
 	carsHandlers := car_handlers.NewCarHandlers(s.carsService)
+	driverLicenseHandlers := driver_license_handlers.NewDriverLicenseHandlers(s.driverLicenseService)
+	userHandlers := user_handlers.NewUserHandlers(s.userService)
 
 	middlewareCache := cache.NewCacheMiddleware(30 * time.Second)
 
@@ -45,6 +53,18 @@ func (s *Server) setupRouter() {
 		cars.PATCH("/:id", carsHandlers.UpdateCar)
 	}
 
+	{
+		license := v1.Group("/license")
+		license.POST("", driverLicenseHandlers.Create)
+		license.PATCH("/:id", driverLicenseHandlers.Update)
+	}
+	{
+		user := v1.Group("user")
+		user.GET("/:id", userHandlers.GetById)
+		user.POST("", userHandlers.Create)
+		user.PATCH("/:id", userHandlers.Update)
+		user.DELETE("/:id", userHandlers.Delete)
+	}
 	s.router = r
 	s.router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 
