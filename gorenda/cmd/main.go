@@ -4,9 +4,11 @@ import (
 	"errors"
 	"github.com/asaipov/gorenda/internal/app/server"
 	"github.com/asaipov/gorenda/internal/infra/db/sqlite"
+	"github.com/asaipov/gorenda/internal/repo/sqlite/booking_repo"
 	"github.com/asaipov/gorenda/internal/repo/sqlite/car_repo"
 	"github.com/asaipov/gorenda/internal/repo/sqlite/driver_license_repo"
 	"github.com/asaipov/gorenda/internal/repo/sqlite/user_repo"
+	"github.com/asaipov/gorenda/internal/service/booking_service"
 	"github.com/asaipov/gorenda/internal/service/car_service"
 	"github.com/asaipov/gorenda/internal/service/driver_license_service"
 	"github.com/asaipov/gorenda/internal/service/user_service"
@@ -14,6 +16,12 @@ import (
 	"net/http"
 	"time"
 )
+
+// TODO - мягкое удаление сущностей
+// TODO - нельзя забронировать забронированную машину
+// TODO - нельзя удалить пользователя или ву если машина забронирована
+// TODO - уникальный номер ВУ
+// TODO - нельзя редактировать софт дели тсущности
 
 func main() {
 	dbc, err := sqlite.Open("./gorenda.db")
@@ -31,9 +39,11 @@ func main() {
 	driverLicenseRepo := driver_license_repo.NewDriverLicenseRepo(dbc)
 	driverLicenseService := driver_license_service.NewDriverLicenseService(driverLicenseRepo)
 	userRepo := user_repo.NewUserRepo(dbc)
-	userService := user_service.NewUserService(userRepo)
+	userService := user_service.NewUserService(userRepo, driverLicenseRepo)
+	bookingRepo := booking_repo.NewBookingRepo(dbc)
+	bookingService := booking_service.NewBookingService(bookingRepo, userRepo, carRepo)
 
-	newServer := server.NewServer(carService, driverLicenseService, userService)
+	newServer := server.NewServer(carService, driverLicenseService, userService, bookingService)
 
 	log.Println("Подключено")
 

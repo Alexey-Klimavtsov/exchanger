@@ -2,7 +2,6 @@ package car_service
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"github.com/asaipov/gorenda/internal/it/model/car_model"
 	"time"
@@ -13,7 +12,7 @@ type CreateCarInput struct {
 	Model       string
 	Year        time.Time
 	RentalPrice int64
-	ImageUrl    sql.NullString
+	ImageUrl    *string
 }
 
 func carToModel(input *CreateCarInput) (*car_model.CarModel, error) {
@@ -24,6 +23,7 @@ func carToModel(input *CreateCarInput) (*car_model.CarModel, error) {
 		RentalPrice: input.RentalPrice,
 		ImageUrl:    input.ImageUrl,
 	}
+
 	return car, car.Validate()
 }
 
@@ -53,6 +53,15 @@ func (s *carService) CreateNewCar(ctx context.Context, car *CreateCarInput) (*ca
 }
 
 func (s *carService) UpdateCar(ctx context.Context, car *CreateCarInput, id int64) (*car_model.CarModel, error) {
+	isNotExists, existsErr := s.repo.Exists(ctx, id)
+	if existsErr != nil {
+		return nil, existsErr
+	}
+
+	if isNotExists {
+		return nil, ErrNotFound
+	}
+
 	c, err := carToModel(car)
 
 	if err != nil {

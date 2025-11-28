@@ -9,4 +9,5 @@ var (
 	ErrUpdate       = errors.New("couldn't update a driver license")
 	ErrDelete       = errors.New("couldn't delete a driver license")
 	ErrDataReading  = errors.New("data reading error")
+	ErrInternal     = errors.New("server drivier license internal error")
 )

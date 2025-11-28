@@ -3,8 +3,10 @@ package driver_license_repo
 import (
 	"context"
 	"database/sql"
+	"fmt"
 	"github.com/asaipov/gorenda/internal/it/model/driver_license_model"
 	"github.com/asaipov/gorenda/internal/service/driver_license_service"
+	"github.com/asaipov/gorenda/internal/service/user_service"
 	"time"
 )
 
@@ -24,8 +26,8 @@ func (r *DriverLicenseRepo) CreateLicense(ctx context.Context, dl *driver_licens
 
 	res, err := r.db.ExecContext(ctx, q, dlCopy.UserID, dlCopy.Number, dlCopy.IssuedAt, dlCopy.ExpiresAt, now)
 	if err != nil {
-		// todo - тоже стрем проверка беспонтовая
-		return nil, driver_license_service.ErrCreate
+		fmt.Println(err)
+		return nil, driver_license_service.ErrInternal
 	}
 
 	dlCopy.CreatedAt = now
@@ -47,14 +49,57 @@ func (r *DriverLicenseRepo) UpdateLicense(ctx context.Context, dl *driver_licens
 
 	res, err := r.db.ExecContext(ctx, q, dlCopy.Number, dlCopy.IssuedAt, dlCopy.ExpiresAt, now, id)
 	if err != nil {
-		return nil, driver_license_service.ErrUpdate
+		return nil, driver_license_service.ErrInternal
 	}
 	affected, _ := res.RowsAffected()
-	// todo - кажется стрем проверка
+
 	if affected == 0 {
 		return nil, driver_license_service.ErrNotFound
 	}
-	dlCopy.UpdatedAt = sql.NullTime{Time: now, Valid: true}
+	dlCopy.UpdatedAt = &now
 	dlCopy.ID = id
 	return dlCopy, nil
+}
+
+func (r *DriverLicenseRepo) GetLicensesByUserId(ctx context.Context, id int64) ([]*driver_license_model.DriverLicenseModel, error) {
+	const q = `
+        SELECT id, number, issued_at, expires_at, created_at, updated_at, user_id
+        FROM driver_licenses
+        WHERE user_id = ?
+    `
+
+	rows, queryErr := r.db.QueryContext(ctx, q, id)
+	if queryErr != nil {
+		return nil, user_service.ErrInternal
+	}
+	defer rows.Close()
+
+	var rightsCategory []*driver_license_model.DriverLicenseModel
+
+	for rows.Next() {
+		var dl driver_license_model.DriverLicenseModel
+		var upd sql.NullTime
+
+		if scanErr := rows.Scan(
+			&dl.ID,
+			&dl.Number,
+			&dl.IssuedAt,
+			&dl.ExpiresAt,
+			&dl.CreatedAt,
+			&upd,
+			&dl.UserID,
+		); scanErr != nil {
+			return nil, driver_license_service.ErrInternal
+		}
+		if upd.Valid {
+			dl.UpdatedAt = &upd.Time
+		}
+		rightsCategory = append(rightsCategory, &dl)
+	}
+
+	err := rows.Err()
+	if err != nil {
+		return nil, driver_license_service.ErrInternal
+	}
+	return rightsCategory, nil
 }

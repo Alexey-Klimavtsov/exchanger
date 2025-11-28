@@ -1,7 +1,6 @@
 package user_model
 
 import (
-	"database/sql"
 	"fmt"
 	"github.com/asaipov/gorenda/internal/it/model/driver_license_model"
 	"time"
@@ -12,13 +11,13 @@ type UserModel struct {
 	FirstName      string                                     `json:"firstName"`
 	LastName       string                                     `json:"lastName"`
 	Email          string                                     `json:"email"`
-	Surname        sql.NullString                             `json:"surname"`
+	Surname        *string                                    `json:"surname"`
 	IsAdmin        bool                                       `json:"isAdmin"`
 	RightsCategory []*driver_license_model.DriverLicenseModel `json:"rightsCategory"`
 	Birthday       time.Time                                  `json:"birthday"`
 	DeletedAt      time.Time                                  `json:"deletedAt"`
 	CreatedAt      time.Time                                  `json:"createdAt"`
-	UpdatedAt      sql.NullTime                               `json:"updatedAt"`
+	UpdatedAt      *time.Time                                 `json:"updatedAt"`
 }
 
 func (m *UserModel) Validate() error {

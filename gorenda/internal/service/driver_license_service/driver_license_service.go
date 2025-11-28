@@ -27,11 +27,13 @@ func mapInputToModel(input *DriverLicenseInput) (*driver_license_model.DriverLic
 type DriverLicenseService interface {
 	CreateLicense(ctx context.Context, dl *DriverLicenseInput) (*driver_license_model.DriverLicenseModel, error)
 	UpdateLicense(ctx context.Context, dl *DriverLicenseInput, id int64) (*driver_license_model.DriverLicenseModel, error)
+	GetLicensesByUserId(ctx context.Context, id int64) ([]*driver_license_model.DriverLicenseModel, error)
 }
 
 type DriverLicenseRepo interface {
 	CreateLicense(ctx context.Context, dl *driver_license_model.DriverLicenseModel) (*driver_license_model.DriverLicenseModel, error)
 	UpdateLicense(ctx context.Context, dl *driver_license_model.DriverLicenseModel, id int64) (*driver_license_model.DriverLicenseModel, error)
+	GetLicensesByUserId(ctx context.Context, id int64) ([]*driver_license_model.DriverLicenseModel, error)
 }
 
 type driverLicenseService struct {
@@ -42,6 +44,7 @@ func NewDriverLicenseService(r DriverLicenseRepo) DriverLicenseService {
 	return &driverLicenseService{repo: r}
 }
 
+// TODO - написать проверку на наличие юзера
 func (s *driverLicenseService) CreateLicense(ctx context.Context, dl *DriverLicenseInput) (*driver_license_model.DriverLicenseModel, error) {
 	dlModel, err := mapInputToModel(dl)
 
@@ -64,4 +67,12 @@ func (s *driverLicenseService) UpdateLicense(ctx context.Context, dl *DriverLice
 	}
 
 	return s.repo.UpdateLicense(ctx, dlModel, id)
+}
+
+func (s *driverLicenseService) GetLicensesByUserId(ctx context.Context, id int64) ([]*driver_license_model.DriverLicenseModel, error) {
+	if id <= 0 {
+		return nil, fmt.Errorf("%w: %v", ErrInvalidInput, id)
+	}
+
+	return s.repo.GetLicensesByUserId(ctx, id)
 }

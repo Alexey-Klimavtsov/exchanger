@@ -10,4 +10,5 @@ type CarRepo interface {
 	UpdateCar(ctx context.Context, car *car_model.CarModel, id int64) (*car_model.CarModel, error)
 	GetCarById(ctx context.Context, id int64) (*car_model.CarModel, error)
 	DeleteCar(ctx context.Context, id int64) (deletedId int64, err error)
+	Exists(ctx context.Context, id int64) (bool, error)
 }

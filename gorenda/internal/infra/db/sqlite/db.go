@@ -31,6 +31,7 @@ CREATE TABLE IF NOT EXISTS users (
     first_name TEXT NOT NULL,
     last_name TEXT NOT NULL,
     surname TEXT,
+    email TEXT NOT NULL,
     birthday TIMESTAMP,
     deleted_at TIMESTAMP,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
@@ -46,6 +47,20 @@ CREATE TABLE IF NOT EXISTS driver_licenses (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE
+);
+
+CREATE TABLE IF NOT EXISTS bookings (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL,
+    car_id INTEGER NOT NULL,
+    date_from TIMESTAMP NOT NULL,
+    date_to TIMESTAMP NOT NULL,
+    price_per_day INTEGER NOT NULL,
+    status TEXT NOT NULL,            -- done, canceled
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+
+    FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
+    FOREIGN KEY (car_id) REFERENCES cars(id) ON DELETE CASCADE
 );
 `
 

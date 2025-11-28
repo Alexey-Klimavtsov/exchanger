@@ -1,7 +1,6 @@
 package user_dto
 
 import (
-	"database/sql"
 	"github.com/asaipov/gorenda/internal/http/dto/driver_license_dto"
 	"github.com/asaipov/gorenda/internal/it/model/user_model"
 	"github.com/asaipov/gorenda/internal/service/user_service"
@@ -28,36 +27,12 @@ type UserResponseDto struct {
 	UpdatedAt      *time.Time                                     `json:"updatedAt"`
 }
 
-func nullStringToPtr(ns sql.NullString) *string {
-	if ns.Valid {
-		return &ns.String
-	}
-	return nil
-}
-
-func nullTimeToPtr(ns sql.NullTime) *time.Time {
-	if ns.Valid {
-		return &ns.Time
-	}
-	return nil
-}
-
 func DtoToInput(dto *UserRequestDto) *user_service.CreateUserInput {
-	var surname sql.NullString
-
-	if dto.Surname != nil {
-		surname = sql.NullString{
-			String: *dto.Surname,
-			Valid:  true,
-		}
-	} else {
-		surname = sql.NullString{Valid: false}
-	}
-
 	return &user_service.CreateUserInput{
 		FirstName: dto.FirstName,
 		LastName:  dto.LastName,
-		Surname:   surname,
+		Email:     dto.Email,
+		Surname:   dto.Surname,
 		Birthday:  dto.Birthday,
 	}
 }
@@ -73,11 +48,11 @@ func UserToResponseDto(u *user_model.UserModel) *UserResponseDto {
 		ID:             u.ID,
 		FirstName:      u.FirstName,
 		LastName:       u.LastName,
-		Surname:        nullStringToPtr(u.Surname),
+		Surname:        u.Surname,
 		Email:          u.Email,
 		RightsCategory: userRights,
 		Birthday:       u.Birthday,
 		CreatedAt:      u.CreatedAt,
-		UpdatedAt:      nullTimeToPtr(u.UpdatedAt),
+		UpdatedAt:      u.UpdatedAt,
 	}
 }

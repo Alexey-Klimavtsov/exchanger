@@ -1,19 +1,18 @@
 package driver_license_model
 
 import (
-	"database/sql"
 	"fmt"
 	"time"
 )
 
 type DriverLicenseModel struct {
-	ID        int64        `json:"id"`
-	UserID    int64        `json:"userId"`
-	Number    string       `json:"number"`
-	IssuedAt  time.Time    `json:"issuedAt"`
-	ExpiresAt time.Time    `json:"expiresAt"`
-	CreatedAt time.Time    `json:"createdAt"`
-	UpdatedAt sql.NullTime `json:"updatedAt"`
+	ID        int64      `json:"id"`
+	UserID    int64      `json:"userId"`
+	Number    string     `json:"number"`
+	IssuedAt  time.Time  `json:"issuedAt"`
+	ExpiresAt time.Time  `json:"expiresAt"`
+	CreatedAt time.Time  `json:"createdAt"`
+	UpdatedAt *time.Time `json:"updatedAt"`
 }
 
 func (m *DriverLicenseModel) Validate() error {

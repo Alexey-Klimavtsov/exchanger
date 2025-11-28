@@ -3,9 +3,11 @@ package server
 import (
 	"context"
 	"github.com/asaipov/gorenda/internal/app/cache"
+	"github.com/asaipov/gorenda/internal/http/handlers/booking_handlers"
 	"github.com/asaipov/gorenda/internal/http/handlers/car_handlers"
 	"github.com/asaipov/gorenda/internal/http/handlers/driver_license_handlers"
 	"github.com/asaipov/gorenda/internal/http/handlers/user_handlers"
+	"github.com/asaipov/gorenda/internal/service/booking_service"
 	"github.com/asaipov/gorenda/internal/service/car_service"
 	"github.com/asaipov/gorenda/internal/service/driver_license_service"
 	"github.com/asaipov/gorenda/internal/service/user_service"
@@ -20,11 +22,12 @@ type Server struct {
 	carsService          car_service.CarService
 	driverLicenseService driver_license_service.DriverLicenseService
 	userService          user_service.UserService
+	bookingService       booking_service.BookingService
 	router               *gin.Engine
 }
 
-func NewServer(carsService car_service.CarService, driverLicenseService driver_license_service.DriverLicenseService, userService user_service.UserService) *Server {
-	s := &Server{carsService: carsService, driverLicenseService: driverLicenseService, userService: userService}
+func NewServer(carsService car_service.CarService, driverLicenseService driver_license_service.DriverLicenseService, userService user_service.UserService, bookingService booking_service.BookingService) *Server {
+	s := &Server{carsService: carsService, driverLicenseService: driverLicenseService, userService: userService, bookingService: bookingService}
 	s.setupRouter()
 	return s
 }
@@ -41,6 +44,7 @@ func (s *Server) setupRouter() {
 	carsHandlers := car_handlers.NewCarHandlers(s.carsService)
 	driverLicenseHandlers := driver_license_handlers.NewDriverLicenseHandlers(s.driverLicenseService)
 	userHandlers := user_handlers.NewUserHandlers(s.userService)
+	bookingHandlers := booking_handlers.NewBookingHandlers(s.bookingService)
 
 	middlewareCache := cache.NewCacheMiddleware(30 * time.Second)
 
@@ -64,6 +68,11 @@ func (s *Server) setupRouter() {
 		user.POST("", userHandlers.Create)
 		user.PATCH("/:id", userHandlers.Update)
 		user.DELETE("/:id", userHandlers.Delete)
+	}
+	{
+		booking := v1.Group("/bookings")
+		booking.POST("/", bookingHandlers.Create)
+		booking.GET("/", bookingHandlers.GetAll)
 	}
 	s.router = r
 	s.router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))

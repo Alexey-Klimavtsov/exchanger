@@ -2,9 +2,9 @@ package user_service
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"github.com/asaipov/gorenda/internal/it/model/user_model"
+	"github.com/asaipov/gorenda/internal/service/driver_license_service"
 	"time"
 )
 
@@ -12,27 +12,20 @@ type CreateUserInput struct {
 	FirstName string
 	LastName  string
 	Email     string
-	Surname   sql.NullString
+	Surname   *string
 	Birthday  time.Time
 }
 
-func userInputToModel(input *CreateUserInput) (*user_model.UserModel, error) {
+func userInputToModel(in *CreateUserInput) (*user_model.UserModel, error) {
 	user := &user_model.UserModel{
-		FirstName: input.FirstName,
-		LastName:  input.LastName,
-		Email:     input.Email,
-		Surname:   input.Surname,
-		Birthday:  input.Birthday,
+		FirstName: in.FirstName,
+		LastName:  in.LastName,
+		Email:     in.Email,
+		Surname:   in.Surname,
+		Birthday:  in.Birthday,
 	}
 
 	return user, user.Validate()
-}
-
-func sqlNull(s string) sql.NullString {
-	if s == "" {
-		return sql.NullString{Valid: false}
-	}
-	return sql.NullString{String: s, Valid: true}
 }
 
 type UserRepo interface {
@@ -40,6 +33,7 @@ type UserRepo interface {
 	UpdateUser(ctx context.Context, u *user_model.UserModel, id int64) (*user_model.UserModel, error)
 	GetUserById(ctx context.Context, id int64) (*user_model.UserModel, error)
 	DeleteUser(ctx context.Context, id int64) (int64, error)
+	Exists(ctx context.Context, id int64) (bool, error)
 }
 
 type UserService interface {
@@ -50,11 +44,12 @@ type UserService interface {
 }
 
 type userService struct {
-	repo UserRepo
+	repo              UserRepo
+	driverLicenseRepo driver_license_service.DriverLicenseRepo
 }
 
-func NewUserService(r UserRepo) UserService {
-	return &userService{repo: r}
+func NewUserService(r UserRepo, dlR driver_license_service.DriverLicenseRepo) UserService {
+	return &userService{repo: r, driverLicenseRepo: dlR}
 }
 
 func (s *userService) CreateUser(ctx context.Context, in *CreateUserInput) (*user_model.UserModel, error) {
@@ -83,8 +78,18 @@ func (s *userService) GetUserById(ctx context.Context, id int64) (*user_model.Us
 	if id <= 0 {
 		return nil, fmt.Errorf("%w: id is negative %v", ErrInvalidInput, id)
 	}
+	user, err := s.repo.GetUserById(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	licenses, getErr := s.driverLicenseRepo.GetLicensesByUserId(ctx, user.ID)
+	if getErr != nil {
+		return nil, getErr
+	}
 
-	return s.repo.GetUserById(ctx, id)
+	user.RightsCategory = licenses
+
+	return user, nil
 }
 
 func (s *userService) DeleteUser(ctx context.Context, id int64) (int64, error) {

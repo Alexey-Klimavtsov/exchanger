@@ -14,13 +14,13 @@ type DriverLicenseRequest struct {
 }
 
 type DriverLicenseResponseDto struct {
-	ID        int64     `json:"id"`
-	UserID    int64     `json:"userId"`
-	Number    string    `json:"number"`
-	IssuedAt  time.Time `json:"issuedAt"`
-	ExpiresAt time.Time `json:"expiresAt"`
-	CreatedAt time.Time `json:"createdAt"`
-	UpdatedAt time.Time `json:"updatedAt"`
+	ID        int64      `json:"id"`
+	UserID    int64      `json:"userId"`
+	Number    string     `json:"number"`
+	IssuedAt  time.Time  `json:"issuedAt"`
+	ExpiresAt time.Time  `json:"expiresAt"`
+	CreatedAt time.Time  `json:"createdAt"`
+	UpdatedAt *time.Time `json:"updatedAt"`
 }
 
 func DtoToInput(dto *DriverLicenseRequest) *driver_license_service.DriverLicenseInput {
@@ -40,6 +40,6 @@ func DriverLicenseModelToDto(model *driver_license_model.DriverLicenseModel) *Dr
 		IssuedAt:  model.IssuedAt,
 		ExpiresAt: model.ExpiresAt,
 		CreatedAt: model.CreatedAt,
-		UpdatedAt: model.UpdatedAt.Time,
+		UpdatedAt: model.UpdatedAt,
 	}
 }

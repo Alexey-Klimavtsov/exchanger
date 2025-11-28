@@ -9,4 +9,5 @@ var (
 	ErrUpdate       = errors.New("couldn't update a car")
 	ErrDelete       = errors.New("couldn't delete a car")
 	ErrDataReading  = errors.New("data reading error")
+	ErrInternal     = errors.New("server car internal error")
 )

@@ -1,7 +1,6 @@
 package car_dto
 
 import (
-	"database/sql"
 	"github.com/asaipov/gorenda/internal/it/model/car_model"
 	"github.com/asaipov/gorenda/internal/service/car_service"
 	"time"
@@ -27,49 +26,24 @@ type CarResponseDto struct {
 }
 
 func CarToResponseDto(c *car_model.CarModel) *CarResponseDto {
-	var imageUrl *string
-	var updatedAt *time.Time
-	if c.ImageUrl.Valid {
-		imageUrl = &c.ImageUrl.String
-	} else {
-		imageUrl = nil
-	}
-	if c.UpdatedAt.Valid {
-		updatedAt = &c.UpdatedAt.Time
-	} else {
-		updatedAt = nil
-	}
-
 	return &CarResponseDto{
 		ID:          c.ID,
 		Brand:       c.Brand,
 		Model:       c.Model,
 		Year:        c.Year,
 		RentalPrice: c.RentalPrice,
-		ImageUrl:    imageUrl,
+		ImageUrl:    c.ImageUrl,
 		CreatedAt:   c.CreatedAt,
-		UpdatedAt:   updatedAt,
+		UpdatedAt:   c.UpdatedAt,
 	}
 }
 
 func DtoToInput(dto *CreateCarRequest) *car_service.CreateCarInput {
-	var imageUrl sql.NullString
-	if dto.ImageUrl != nil {
-		imageUrl = sql.NullString{
-			String: *dto.ImageUrl,
-			Valid:  true,
-		}
-	} else {
-		imageUrl = sql.NullString{
-			Valid: false,
-		}
-	}
-
 	return &car_service.CreateCarInput{
 		Brand:       dto.Brand,
 		Model:       dto.Model,
 		Year:        dto.Year,
 		RentalPrice: dto.RentalPrice,
-		ImageUrl:    imageUrl,
+		ImageUrl:    dto.ImageUrl,
 	}
 }

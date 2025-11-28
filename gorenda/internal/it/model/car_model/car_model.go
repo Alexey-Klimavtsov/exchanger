@@ -1,20 +1,19 @@
 package car_model
 
 import (
-	"database/sql"
 	"fmt"
 	"time"
 )
 
 type CarModel struct {
-	ID          int64          `json:"id"`
-	Brand       string         `json:"brand"`
-	Model       string         `json:"model"`
-	Year        time.Time      `json:"year"`
-	RentalPrice int64          `json:"rentalPrice"`
-	ImageUrl    sql.NullString `json:"imageUrl"`
-	CreatedAt   time.Time      `json:"createdAt"`
-	UpdatedAt   sql.NullTime   `json:"updatedAt"`
+	ID          int64      `json:"id"`
+	Brand       string     `json:"brand"`
+	Model       string     `json:"model"`
+	Year        time.Time  `json:"year"`
+	RentalPrice int64      `json:"rentalPrice"`
+	ImageUrl    *string    `json:"imageUrl"`
+	CreatedAt   time.Time  `json:"createdAt"`
+	UpdatedAt   *time.Time `json:"updatedAt"`
 }
 
 func (m *CarModel) Validate() error {
