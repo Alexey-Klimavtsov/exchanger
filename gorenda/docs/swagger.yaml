@@ -1,0 +1,1122 @@
+basePath: /v1
+definitions:
+  actor_dto.ActorResponseDto:
+    properties:
+      Birthday:
+        type: string
+      FirstName:
+        type: string
+      ID:
+        type: integer
+      LastName:
+        type: string
+    type: object
+  actor_dto.CreateActorRequest:
+    properties:
+      Birthday:
+        type: string
+      FirstName:
+        type: string
+      LastName:
+        type: string
+    type: object
+  director_dto.CreateDirectorRequest:
+    properties:
+      Birthday:
+        type: string
+      FirstName:
+        type: string
+      LastName:
+        type: string
+    type: object
+  director_dto.DirectorResponseDto:
+    properties:
+      Birthday:
+        type: string
+      FirstName:
+        type: string
+      ID:
+        type: integer
+      LastName:
+        type: string
+    type: object
+  film_dto.CreateFilmRequest:
+    properties:
+      actorIds:
+        items:
+          type: integer
+        type: array
+      directorId:
+        type: integer
+      duration:
+        minimum: 1
+        type: integer
+      genreIds:
+        items:
+          type: integer
+        type: array
+      rates:
+        items:
+          $ref: '#/definitions/film_model.UserRate'
+        type: array
+      title:
+        maxLength: 200
+        minLength: 1
+        type: string
+      year:
+        maximum: 2100
+        minimum: 1895
+        type: integer
+    required:
+    - title
+    type: object
+  film_dto.FilmResponseDto:
+    properties:
+      actors:
+        items:
+          type: integer
+        type: array
+      createdAt:
+        type: string
+      director:
+        $ref: '#/definitions/director_dto.DirectorResponseDto'
+      duration:
+        type: integer
+      genres:
+        items:
+          type: integer
+        type: array
+      id:
+        type: integer
+      rates:
+        items:
+          $ref: '#/definitions/film_model.UserRate'
+        type: array
+      title:
+        type: string
+      updatedAt:
+        type: string
+      year:
+        type: integer
+    type: object
+  film_model.UserRate:
+    properties:
+      userID:
+        format: int64
+        type: integer
+      value:
+        format: float64
+        type: number
+    type: object
+  genre_dto.GenreCreateRequest:
+    properties:
+      title:
+        type: string
+    type: object
+  genre_dto.GenreResponseDto:
+    properties:
+      createdAt:
+        type: string
+      id:
+        format: int64
+        type: integer
+      title:
+        type: string
+    type: object
+  playlist_dto.CreatePlaylistRequest:
+    properties:
+      title:
+        type: string
+    type: object
+  playlist_dto.PlaylistResponseDto:
+    properties:
+      ID:
+        type: integer
+      createdAt:
+        type: string
+      films:
+        items:
+          $ref: '#/definitions/film_dto.FilmResponseDto'
+        type: array
+      title:
+        type: string
+      updatedAt:
+        type: string
+    type: object
+  user_dto.UserResponseDto:
+    properties:
+      email:
+        type: string
+      name:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: API для работы с фильмами, плейлистами, актёрами, жанрами и пользователями.
+  title: Kinopoisk API
+  version: "1.0"
+paths:
+  /actor:
+    get:
+      description: Возвращает всех актёров с пагинацией
+      parameters:
+      - default: 10
+        description: Лимит
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Смещение
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: items, count
+          schema:
+            additionalProperties: true
+            type: object
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получить список актёров
+      tags:
+      - actors
+  /actor/{id}:
+    delete:
+      description: Удаляет актёра по ID
+      parameters:
+      - description: Actor ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ID удалённого актёра
+          schema:
+            additionalProperties:
+              format: int64
+              type: integer
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Удалить актёра
+      tags:
+      - actors
+    get:
+      description: Возвращает актёра по ID
+      parameters:
+      - description: Actor ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/actor_dto.ActorResponseDto'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получить актёра по ID
+      tags:
+      - actors
+  /actor/create:
+    post:
+      consumes:
+      - application/json
+      description: Создаёт нового актёра
+      parameters:
+      - description: Данные актёра
+        in: body
+        name: actor
+        required: true
+        schema:
+          $ref: '#/definitions/actor_dto.CreateActorRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/actor_dto.ActorResponseDto'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Создать нового актёра
+      tags:
+      - actors
+  /actor/update/{id}:
+    patch:
+      consumes:
+      - application/json
+      description: Обновляет имя, фамилию или дату рождения актёра
+      parameters:
+      - description: Actor ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Новые данные актёра
+        in: body
+        name: actor
+        required: true
+        schema:
+          $ref: '#/definitions/actor_dto.CreateActorRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/actor_dto.ActorResponseDto'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Обновить данные актёра
+      tags:
+      - actors
+  /director:
+    get:
+      description: Возвращает список режиссёров с пагинацией
+      parameters:
+      - default: 10
+        description: Лимит
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Смещение
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: items, count
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Получить список режиссёров
+      tags:
+      - directors
+  /director/{id}:
+    delete:
+      description: Удаляет режиссёра по ID
+      parameters:
+      - description: Director ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ID удалённого режиссёра
+          schema:
+            additionalProperties:
+              format: int64
+              type: integer
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Удалить режиссёра
+      tags:
+      - directors
+    get:
+      description: Возвращает режиссёра по его идентификатору
+      parameters:
+      - description: Director ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/director_dto.DirectorResponseDto'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получить режиссёра по ID
+      tags:
+      - directors
+  /director/create:
+    post:
+      consumes:
+      - application/json
+      description: Создаёт нового режиссёра
+      parameters:
+      - description: Данные режиссёра
+        in: body
+        name: director
+        required: true
+        schema:
+          $ref: '#/definitions/director_dto.CreateDirectorRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/director_dto.DirectorResponseDto'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Создать нового режиссёра
+      tags:
+      - directors
+  /director/update/{id}:
+    patch:
+      consumes:
+      - application/json
+      description: Обновляет информацию о режиссёре
+      parameters:
+      - description: Director ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Новые данные
+        in: body
+        name: director
+        required: true
+        schema:
+          $ref: '#/definitions/director_dto.CreateDirectorRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/director_dto.DirectorResponseDto'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Обновить данные режиссёра
+      tags:
+      - directors
+  /films:
+    get:
+      description: Возвращает список всех фильмов с пагинацией
+      parameters:
+      - default: 10
+        description: Лимит
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Смещение
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: items, count
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Получить список фильмов
+      tags:
+      - films
+  /films/{id}:
+    delete:
+      description: Удаляет фильм по ID
+      parameters:
+      - description: Film ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: Удалённый ID
+          schema:
+            additionalProperties:
+              format: int64
+              type: integer
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Удалить фильм
+      tags:
+      - films
+    get:
+      description: Возвращает фильм по его идентификатору
+      parameters:
+      - description: Film ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/film_dto.FilmResponseDto'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получить фильм по ID
+      tags:
+      - films
+  /films/byDirectorId/{id}:
+    get:
+      description: Возвращает фильмы по ID режиссёра
+      parameters:
+      - description: Director ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Лимит
+        in: query
+        name: limit
+        type: integer
+      - description: Смещение
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: items, count
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Получить фильмы конкретного режиссёра
+      tags:
+      - films
+  /films/create:
+    post:
+      consumes:
+      - application/json
+      description: Создаёт новый фильм с актёрами, жанрами и режиссёром
+      parameters:
+      - description: Данные фильма
+        in: body
+        name: film
+        required: true
+        schema:
+          $ref: '#/definitions/film_dto.CreateFilmRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/film_dto.FilmResponseDto'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Создать новый фильм
+      tags:
+      - films
+  /films/update/{id}:
+    patch:
+      consumes:
+      - application/json
+      description: Обновляет название, год, актёров, жанры и режиссёра фильма
+      parameters:
+      - description: Film ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Новые данные
+        in: body
+        name: film
+        required: true
+        schema:
+          $ref: '#/definitions/film_dto.CreateFilmRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/film_dto.FilmResponseDto'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Обновить данные фильма
+      tags:
+      - films
+  /genres:
+    get:
+      description: Возвращает список жанров с пагинацией
+      parameters:
+      - default: 10
+        description: Лимит
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Смещение
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: items, count
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Получить список жанров
+      tags:
+      - genres
+  /genres/{id}:
+    delete:
+      description: Удаляет жанр по ID
+      parameters:
+      - description: Genre ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ID deleted
+          schema:
+            additionalProperties:
+              format: int64
+              type: integer
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Удалить жанр
+      tags:
+      - genres
+    get:
+      description: Возвращает жанр по его идентификатору
+      parameters:
+      - description: Genre ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/genre_dto.GenreResponseDto'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получить жанр по ID
+      tags:
+      - genres
+  /genres/create:
+    post:
+      consumes:
+      - application/json
+      description: Создаёт новый жанр
+      parameters:
+      - description: Данные жанра
+        in: body
+        name: genre
+        required: true
+        schema:
+          $ref: '#/definitions/genre_dto.GenreCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/genre_dto.GenreResponseDto'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Создать жанр
+      tags:
+      - genres
+  /genres/update/{id}:
+    patch:
+      consumes:
+      - application/json
+      description: Обновляет существующий жанр
+      parameters:
+      - description: Genre ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Новые данные
+        in: body
+        name: genre
+        required: true
+        schema:
+          $ref: '#/definitions/genre_dto.GenreCreateRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/genre_dto.GenreResponseDto'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Обновить жанр
+      tags:
+      - genres
+  /playlists:
+    get:
+      description: Возвращает список плейлистов с пагинацией
+      parameters:
+      - default: 10
+        description: Лимит
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Смещение
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: items, count
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Получить список плейлистов
+      tags:
+      - playlists
+  /playlists/{id}:
+    delete:
+      description: Удаляет плейлист по ID
+      parameters:
+      - description: Playlist ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ID удалённого плейлиста
+          schema:
+            additionalProperties:
+              format: int64
+              type: integer
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Удалить плейлист
+      tags:
+      - playlists
+    get:
+      description: Возвращает плейлист и список фильмов в нём
+      parameters:
+      - description: Playlist ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/playlist_dto.PlaylistResponseDto'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получить плейлист по ID
+      tags:
+      - playlists
+  /playlists/create:
+    post:
+      consumes:
+      - application/json
+      description: Создаёт новый пустой плейлист
+      parameters:
+      - description: Playlist data
+        in: body
+        name: playlist
+        required: true
+        schema:
+          $ref: '#/definitions/playlist_dto.CreatePlaylistRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/playlist_dto.PlaylistResponseDto'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Создать плейлист
+      tags:
+      - playlists
+  /playlists/create/{id}:
+    post:
+      consumes:
+      - application/json
+      description: Добавляет один или несколько фильмов в плейлист по ID
+      parameters:
+      - description: Playlist ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: IDs of films
+        in: body
+        name: films
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              format: int64
+              type: integer
+            type: array
+      summary: Добавить фильмы в плейлист
+      tags:
+      - playlists
+  /playlists/delete/{id}:
+    post:
+      consumes:
+      - application/json
+      description: Удаляет один или несколько фильмов по ID из плейлиста
+      parameters:
+      - description: Playlist ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: IDs of films
+        in: body
+        name: films
+        required: true
+        schema:
+          items:
+            type: integer
+          type: array
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              format: int64
+              type: integer
+            type: array
+      summary: Удалить фильмы из плейлиста
+      tags:
+      - playlists
+  /playlists/update/{id}:
+    patch:
+      consumes:
+      - application/json
+      description: Обновляет название плейлиста
+      parameters:
+      - description: Playlist ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Новые данные
+        in: body
+        name: playlist
+        required: true
+        schema:
+          $ref: '#/definitions/playlist_dto.CreatePlaylistRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/playlist_dto.PlaylistResponseDto'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Обновить плейлист
+      tags:
+      - playlists
+  /users:
+    get:
+      description: Возвращает список пользователей с пагинацией
+      parameters:
+      - default: 10
+        description: Лимит
+        in: query
+        name: limit
+        type: integer
+      - default: 0
+        description: Смещение
+        in: query
+        name: offset
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: items, count
+          schema:
+            additionalProperties: true
+            type: object
+      summary: Получить список пользователей
+      tags:
+      - users
+  /users/{id}:
+    delete:
+      description: Удаляет пользователя по ID
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: ID удалённого пользователя
+          schema:
+            additionalProperties:
+              format: int64
+              type: integer
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Удалить пользователя
+      tags:
+      - users
+    get:
+      description: Возвращает одного пользователя
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user_dto.UserResponseDto'
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получить пользователя по ID
+      tags:
+      - users
+  /users/create:
+    post:
+      consumes:
+      - application/json
+      description: Создаёт нового пользователя
+      parameters:
+      - description: User data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/user_dto.UserResponseDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user_dto.UserResponseDto'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Создать пользователя
+      tags:
+      - users
+  /users/update/{id}:
+    patch:
+      consumes:
+      - application/json
+      description: Обновляет имя и email пользователя
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: New user data
+        in: body
+        name: user
+        required: true
+        schema:
+          $ref: '#/definitions/user_dto.UserResponseDto'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/user_dto.UserResponseDto'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+        "404":
+          description: Not Found
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Обновить пользователя
+      tags:
+      - users
+swagger: "2.0"
