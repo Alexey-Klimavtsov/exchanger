@@ -3,20 +3,28 @@ package main
 import (
 	"weather-go/handler"
 	"weather-go/middleware"
-
+"weather-go/cache"
+"weather-go/config"
+"weather-go/service"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
-	r := gin.New()
+	cfg:=config.Load()
 
-	r.Use(
+	c:=cache.New()
+	svc:=service.New(c,cfg.CacheTTL)
+	h:=handler.New(svc)
+
+	r := gin.New()
+    r.Use(
 		gin.Recovery(),
 		middleware.Logger(),
+		middleware.NewLimiter(cfg.RateLimit,cfg.RateWindow),
 	)
 
-		r.GET("/weather", handler.Weather)
+		r.GET("/weather", h.Weather)
 	
 
-	r.Run(":8080")
+	r.Run(cfg.Port)
 }

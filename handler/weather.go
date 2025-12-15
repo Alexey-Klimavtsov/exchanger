@@ -8,8 +8,16 @@ import (
 
 	"github.com/gin-gonic/gin"
 )
+type Handler struct{
+	service *service.Service
+}
 
-func Weather(c *gin.Context) {
+
+func New(s *service.Service) *Handler{
+	return &Handler{service: s}
+}
+
+func (h *Handler) Weather(c *gin.Context) {
 	city := strings.ToLower(c.Query("city"))
 	if city == "" {
 		c.JSON(http.StatusBadRequest, gin.H{
@@ -18,7 +26,7 @@ func Weather(c *gin.Context) {
 		return
 	}
 
-	result, err := service.GetWeather(city)
+	result, err := h.service.GetWeather(city)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": err.Error(),

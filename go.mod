@@ -1,7 +1,6 @@
 module weather-go
 
 go 1.24.5
-
 require (
 	github.com/bytedance/gopkg v0.1.3 // indirect
 	github.com/bytedance/sonic v1.14.2 // indirect
