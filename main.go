@@ -24,7 +24,11 @@ func main() {
 	)
 
 		r.GET("/weather", h.Weather)
+
+		r.GET("/today", h.Today)
+        r.GET("/weekly", h.Weekly)
 	
 
 	r.Run(cfg.Port)
+
 }

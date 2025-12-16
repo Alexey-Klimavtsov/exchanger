@@ -6,6 +6,7 @@ import (
 	"weather-go/cache"
 	"weather-go/model"
 	"weather-go/provider"
+	
 )
 
 type Service struct{
@@ -54,4 +55,52 @@ func(s*Service) GetWeather(city string) (model.Weather, error) {
 
 	s.cache.Set(city,result,s.cacheTTL)
 	return result,nil 
+}
+
+
+func (s *Service) GetToday(city, unit string) (model.TodayWeather, error) {
+	w, err := s.GetWeather(city)
+	if err != nil {
+		return model.TodayWeather{}, err
+	}
+
+	temp := w.OpenMeteo
+	if unit == "fahrenheit" {
+		temp = temp*1.8 + 32
+	}
+
+	return model.TodayWeather{
+		Temperature: temp,
+		Description: "Clear",
+		Unit:        unit,
+	}, nil
+}
+
+func (s *Service) GetWeekly(city, unit string) (model.WeeklyWeather, error) {
+	_, err := s.GetWeather(city)
+	if err != nil {
+		return model.WeeklyWeather{}, err
+	}
+
+	days := []model.DayWeather{
+	    {Day: "Mon", Temperature: 20},
+		{Day: "Tue", Temperature: 21},
+		{Day: "Wed", Temperature: 19},
+		{Day: "Thu", Temperature: 18},
+		{Day: "Fri", Temperature: 22},
+		{Day: "Sat", Temperature: 23},
+		{Day: "Sun", Temperature: 21},
+
+	}
+
+	if unit == "fahrenheit" {
+		for i := range days {
+			days[i].Temperature = days[i].Temperature*1.8 + 32
+		}
+	}
+
+	return model.WeeklyWeather{
+		Days: days,
+		Unit: unit,
+	}, nil
 }
