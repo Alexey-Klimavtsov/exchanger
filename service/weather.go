@@ -14,6 +14,12 @@ cache  *cache.Cache
 cacheTTL  time.Duration
 }
 
+type WeatherService interface {
+	Today(city, unit string) (model.TodayWeather, error)
+	Weekly(city, unit string) (model.WeeklyWeather, error)
+}
+
+
 func New(cache *cache.Cache,ttl time.Duration) *Service{
 return &Service{
 cache:  cache,
@@ -58,7 +64,7 @@ func(s*Service) GetWeather(city string) (model.Weather, error) {
 }
 
 
-func (s *Service) GetToday(city, unit string) (model.TodayWeather, error) {
+func (s *Service) Today(city, unit string) (model.TodayWeather, error) {
 	w, err := s.GetWeather(city)
 	if err != nil {
 		return model.TodayWeather{}, err
@@ -76,7 +82,7 @@ func (s *Service) GetToday(city, unit string) (model.TodayWeather, error) {
 	}, nil
 }
 
-func (s *Service) GetWeekly(city, unit string) (model.WeeklyWeather, error) {
+func (s *Service) Weekly(city, unit string) (model.WeeklyWeather, error) {
 	_, err := s.GetWeather(city)
 	if err != nil {
 		return model.WeeklyWeather{}, err

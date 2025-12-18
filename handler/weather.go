@@ -58,7 +58,7 @@ func (h *Handler) Today(c *gin.Context) {
 		return
 	}
 
-	data, err := h.service.GetToday(city, unit)
+	data, err := h.service.Today(city, unit)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
@@ -85,7 +85,7 @@ func (h *Handler) Weekly(c *gin.Context) {
 		return
 	}
 
-	data, err := h.service.GetWeekly(city, unit)
+	data, err := h.service.Weekly(city, unit)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
