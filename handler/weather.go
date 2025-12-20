@@ -47,6 +47,7 @@ func (h *Handler) Weather(c *gin.Context) {
 // @Failure 400 {object} map[string]string
 // @Router /today [get]
 func (h *Handler) Today(c *gin.Context) {
+	//panic("boom")
 	city := c.Query("city")
 	//uint:="fahrenheit"
 	unit := c.DefaultQuery("unit", "celsius")

@@ -49,7 +49,7 @@ flag.Parse()
 
 	r := gin.New()
     r.Use(
-		gin.Recovery(),
+		middleware.Recovery(),
 		middleware.Logger(),
 		middleware.NewLimiter(cfg.RateLimit,cfg.RateWindow),
 	)
