@@ -6,6 +6,7 @@ import (
 	"weather-go/cache"
 	"weather-go/model"
 	"weather-go/provider"
+	"weather-go/util"
 	
 )
 
@@ -100,13 +101,26 @@ func (s *Service) Weekly(city, unit string) (model.WeeklyWeather, error) {
 	}
 
 	if unit == "fahrenheit" {
-		for i := range days {
-			days[i].Temperature = days[i].Temperature*1.8 + 32
-		}
+	  days = util.Map(days,func (d model.DayWeather)model.DayWeather  {
+			d.Temperature = d.Temperature*1.8 + 32
+			return d
+		})
 	}
+
+	temps := util.Map(days,func(d model.DayWeather)float64  {
+	  return d.Temperature	
+	})
+
+	avg :=util.Sum(temps)/float64(len(temps))
+
+	hotDays:= util.Filter(days,func(d model.DayWeather) bool {
+		return d.Temperature >20
+	})
 
 	return model.WeeklyWeather{
 		Days: days,
 		Unit: unit,
+		AvgTemp: avg,
+		HotDays: hotDays,
 	}, nil
 }

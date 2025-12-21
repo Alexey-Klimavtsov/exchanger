@@ -9,6 +9,8 @@ type TodayWeather struct {
 type WeeklyWeather struct{
 	Days []DayWeather `json:"days"`
 	Unit string `json:"unit"`
+	AvgTemp  float64      `json:"avg_temp"`
+	HotDays  []DayWeather `json:"hot_days"`
 }
 
 type DayWeather struct{

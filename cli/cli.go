@@ -2,8 +2,9 @@ package cli
 
 import (
 	"fmt"
-
+"weather-go/util" 
 	"weather-go/service"
+	"weather-go/model" 
 )
 
 type CLI struct {
@@ -15,23 +16,30 @@ func New(w service.WeatherService) *CLI {
 }
 
 func (c *CLI) Run() {
-	var city string
-
-	fmt.Print("Введите город: ")
-	fmt.Scanln(&city)
-
-	if city == "" {
-		city = "almaty"
-	}
-
-	result, err := c.weather.Today(city, "celsius")
+	
+weekly, err := c.weather.Weekly("almaty", "celsius")
 	if err != nil {
 		fmt.Println("error:", err)
 		return
 	}
 
-	fmt.Printf("🌤 Погода в %s: %.1f °C\n",
-		city,
-		result.Temperature,
-	)
+	temps := util.Map(weekly.Days, func(d model.DayWeather) float64 {
+		return d.Temperature
+	})
+
+	avg := util.Sum(temps) / float64(len(temps))
+
+	hot := util.Filter(weekly.Days, func(d model.DayWeather) bool {
+		return d.Temperature > 20
+	})
+
+	fmt.Println("Город: Almaty")
+	fmt.Println("Средняя температура:", avg)
+
+	fmt.Println("Тёплые дни:")
+	for _, d := range hot {
+		fmt.Printf("- %s: %.1f°C\n", d.Day, d.Temperature)
+	}
+
+
 }
