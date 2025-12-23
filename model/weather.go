@@ -4,6 +4,7 @@ type TodayWeather struct {
 	Temperature   float64  `json:"temperature"`
 	Description string `json:"description"`
 	Unit      string `json:"unit"`
+   
 }
 
 type WeeklyWeather struct{
@@ -11,11 +12,15 @@ type WeeklyWeather struct{
 	Unit string `json:"unit"`
 	AvgTemp  float64      `json:"avg_temp"`
 	HotDays  []DayWeather `json:"hot_days"`
+	City      string  `json:"city"`
 }
 
 type DayWeather struct{
 	Day  string`json:"day"`
 	Temperature float64 `json:"temperature"`
+	 City      string  `json:"city"`
+    Temp   float64  `json:"temp"`
+	Unit      string `json:"unit"`
 }
 
 type Weather struct {

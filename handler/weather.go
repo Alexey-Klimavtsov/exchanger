@@ -94,3 +94,29 @@ func (h *Handler) Weekly(c *gin.Context) {
 
 	c.JSON(http.StatusOK, data)
 }
+
+type WeatherHandler struct {
+	service service.WeatherService // 👈 ИНТЕРФЕЙС
+}
+
+func NewWeatherHandler(s service.WeatherService) *WeatherHandler {
+	return &WeatherHandler{service: s}
+}
+
+func (h *WeatherHandler) Today(c *gin.Context) {
+	city := c.Query("city")
+	unit := c.DefaultQuery("unit", "celsius")
+
+	if city == "" {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "city is required"})
+		return
+	}
+
+	data, err := h.service.Today(city, unit)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, data)
+}

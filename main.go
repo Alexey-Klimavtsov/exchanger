@@ -26,14 +26,11 @@ import (
 // @BasePath /
 func main() {
 
+
 	cliMode:=flag.Bool("cli",false,"Run as CLI")
 flag.Parse()
 	
-	docs.SwaggerInfo.Title = "Weather API"
-    docs.SwaggerInfo.Description = "API для получения прогноза погоды"
-    docs.SwaggerInfo.Version = "1.0"
-    docs.SwaggerInfo.Host = "localhost:8080"
-    docs.SwaggerInfo.BasePath = "/"
+	
 
 	cfg:=config.Load()
 	c:=cache.New()
@@ -45,7 +42,13 @@ flag.Parse()
 		cliApp.Run()
 		return
 	}
-	h:=handler.New(svc)
+	weatherHandler := handler.New(svc)
+
+	docs.SwaggerInfo.Title = "Weather API"
+    docs.SwaggerInfo.Description = "API для получения прогноза погоды"
+    docs.SwaggerInfo.Version = "1.0"
+    docs.SwaggerInfo.Host = "localhost:8080"
+    docs.SwaggerInfo.BasePath = "/"
 
 	r := gin.New()
     r.Use(
@@ -55,12 +58,13 @@ flag.Parse()
 	)
       
       	r.GET("/docs/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
-		r.GET("/weather", h.Weather)
-		r.GET("/today", h.Today)
-        r.GET("/weekly", h.Weekly)
-	
-
+		r.GET("/weather", weatherHandler.Weather)
+		r.GET("/today", weatherHandler.Today)
+        r.GET("/weekly", weatherHandler.Weekly)
+		
 	r.Run(cfg.Port)
 
-
+	
 }
+
+
