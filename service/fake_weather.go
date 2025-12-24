@@ -1,15 +1,14 @@
-
 package service
 
 import "weather-go/model"
 
-type FakeWeatherService struct {}
+type FakeWeatherService struct{}
 
-func (f FakeWeatherService) Today(city, unit string) (model.DayWeather, error) {
-	return model.DayWeather{
-		City: city,
-		Temp: 20,
-		Unit: unit,
+func (f FakeWeatherService) Today(city, unit string) (model.TodayWeather, error) {
+	return model.TodayWeather{
+		Temperature: 20,
+		Description: "Clear",
+		Unit:        unit,
 	}, nil
 }
 

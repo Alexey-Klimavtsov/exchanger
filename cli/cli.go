@@ -2,9 +2,9 @@ package cli
 
 import (
 	"fmt"
-"weather-go/util" 
+	"weather-go/model"
 	"weather-go/service"
-	"weather-go/model" 
+	"weather-go/util"
 )
 
 type CLI struct {
@@ -16,8 +16,8 @@ func New(w service.WeatherService) *CLI {
 }
 
 func (c *CLI) Run() {
-	
-weekly, err := c.weather.Weekly("almaty", "celsius")
+
+	weekly, err := c.weather.Weekly("almaty", "celsius")
 	if err != nil {
 		fmt.Println("error:", err)
 		return
@@ -40,6 +40,5 @@ weekly, err := c.weather.Weekly("almaty", "celsius")
 	for _, d := range hot {
 		fmt.Printf("- %s: %.1f°C\n", d.Day, d.Temperature)
 	}
-
 
 }

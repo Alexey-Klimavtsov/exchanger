@@ -8,12 +8,12 @@ import (
 
 	"github.com/gin-gonic/gin"
 )
-type Handler struct{
+
+type Handler struct {
 	service *service.Service
 }
 
-
-func New(s *service.Service) *Handler{
+func New(s *service.Service) *Handler {
 	return &Handler{service: s}
 }
 
@@ -47,15 +47,11 @@ func (h *Handler) Weather(c *gin.Context) {
 // @Failure 400 {object} map[string]string
 // @Router /today [get]
 func (h *Handler) Today(c *gin.Context) {
-	//panic("boom")
-	city := c.Query("city")
-	//uint:="fahrenheit"
+	city := strings.ToLower(c.Query("city"))
 	unit := c.DefaultQuery("unit", "celsius")
 
 	if city == "" {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "city is required"})
-		//c.JSON(http.StatusOK, gin.H{"error": "city is required"})
-
 		return
 	}
 
@@ -78,7 +74,7 @@ func (h *Handler) Today(c *gin.Context) {
 // @Failure 400 {object} map[string]string
 // @Router /weekly [get]
 func (h *Handler) Weekly(c *gin.Context) {
-	city := c.Query("city")
+	city := strings.ToLower(c.Query("city"))
 	unit := c.DefaultQuery("unit", "celsius")
 
 	if city == "" {
@@ -89,32 +85,6 @@ func (h *Handler) Weekly(c *gin.Context) {
 	data, err := h.service.Weekly(city, unit)
 	if err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
-		return
-	}
-
-	c.JSON(http.StatusOK, data)
-}
-
-type WeatherHandler struct {
-	service service.WeatherService // 👈 ИНТЕРФЕЙС
-}
-
-func NewWeatherHandler(s service.WeatherService) *WeatherHandler {
-	return &WeatherHandler{service: s}
-}
-
-func (h *WeatherHandler) Today(c *gin.Context) {
-	city := c.Query("city")
-	unit := c.DefaultQuery("unit", "celsius")
-
-	if city == "" {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "city is required"})
-		return
-	}
-
-	data, err := h.service.Today(city, unit)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 

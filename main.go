@@ -1,22 +1,20 @@
 package main
 
 import (
-
 	"flag"
 	"fmt"
-	"weather-go/cli"
 
+	"github.com/gin-gonic/gin"
+	swaggerfiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
+
+	"weather-go/cache"
+	"weather-go/cli"
+	"weather-go/config"
+	_ "weather-go/docs" // для инициализации Swagger
 	"weather-go/handler"
 	"weather-go/middleware"
-"weather-go/cache"
-"weather-go/config"
-"weather-go/service"
-	"github.com/gin-gonic/gin"
-
-
-	swaggerfiles "github.com/swaggo/files" // сам сваггер 
-	ginSwagger "github.com/swaggo/gin-swagger" // пакет для Gin 
-	docs "weather-go/docs" 
+	"weather-go/service"
 )
 
 // @title Weather API
@@ -26,45 +24,32 @@ import (
 // @BasePath /
 func main() {
 
+	cliMode := flag.Bool("cli", false, "Run as CLI")
+	flag.Parse()
 
-	cliMode:=flag.Bool("cli",false,"Run as CLI")
-flag.Parse()
-	
-	
+	cfg := config.Load()
+	c := cache.New()
+	svc := service.New(c, cfg.CacheTTL)
 
-	cfg:=config.Load()
-	c:=cache.New()
-	svc:=service.New(c,cfg.CacheTTL)
-
-	if *cliMode{
+	if *cliMode {
 		fmt.Println("CLI режим (Погода)")
-		cliApp:=cli.New(svc)
+		cliApp := cli.New(svc)
 		cliApp.Run()
 		return
 	}
 	weatherHandler := handler.New(svc)
 
-	docs.SwaggerInfo.Title = "Weather API"
-    docs.SwaggerInfo.Description = "API для получения прогноза погоды"
-    docs.SwaggerInfo.Version = "1.0"
-    docs.SwaggerInfo.Host = "localhost:8080"
-    docs.SwaggerInfo.BasePath = "/"
-
 	r := gin.New()
-    r.Use(
+	r.Use(
 		middleware.Recovery(),
 		middleware.Logger(),
-		middleware.NewLimiter(cfg.RateLimit,cfg.RateWindow),
+		middleware.NewLimiter(cfg.RateLimit, cfg.RateWindow),
 	)
-      
-      	r.GET("/docs/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
-		r.GET("/weather", weatherHandler.Weather)
-		r.GET("/today", weatherHandler.Today)
-        r.GET("/weekly", weatherHandler.Weekly)
-		
+
+	r.GET("/docs/*any", ginSwagger.WrapHandler(swaggerfiles.Handler))
+	r.GET("/weather", weatherHandler.Weather)
+	r.GET("/today", weatherHandler.Today)
+	r.GET("/weekly", weatherHandler.Weekly)
+
 	r.Run(cfg.Port)
-
-	
 }
-
-

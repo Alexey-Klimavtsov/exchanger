@@ -10,18 +10,16 @@ func NewOpenMeteo(apiKey string) *OpenMeteoService {
 	return &OpenMeteoService{apiKey: apiKey}
 }
 
-// 👇 РЕАЛИЗАЦИЯ интерфейса
-func (o *OpenMeteoService) Today(city, unit string) (model.DayWeather, error) {
-	// запрос к API
-	return model.DayWeather{
-		City: city,
-		Temp: 25,
-		Unit: unit,
+// Today реализует интерфейс WeatherService
+func (o *OpenMeteoService) Today(city, unit string) (model.TodayWeather, error) {
+	// TODO: реализовать запрос к API
+	return model.TodayWeather{
+		Temperature: 25,
+		Description: "Clear",
+		Unit:        unit,
 	}, nil
 }
 
 func (o *OpenMeteoService) Weekly(city, unit string) (model.WeeklyWeather, error) {
-	return model.WeeklyWeather{
-		City: city,
-	}, nil
+	return model.WeeklyWeather{}, nil
 }

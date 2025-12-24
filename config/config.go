@@ -3,10 +3,10 @@ package config
 import "time"
 
 type Config struct {
-	Port        string
-	CacheTTL    time.Duration
-	RateLimit   int
-	RateWindow  time.Duration
+	Port       string
+	CacheTTL   time.Duration
+	RateLimit  int
+	RateWindow time.Duration
 }
 
 func Load() Config {
