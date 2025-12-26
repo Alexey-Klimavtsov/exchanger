@@ -1,0 +1,99 @@
+basePath: /
+definitions:
+  model.DayWeather:
+    properties:
+      day:
+        type: string
+      temperature:
+        type: number
+    type: object
+  model.TodayWeather:
+    properties:
+      description:
+        type: string
+      temperature:
+        type: number
+      unit:
+        type: string
+    type: object
+  model.WeeklyWeather:
+    properties:
+      days:
+        items:
+          $ref: '#/definitions/model.DayWeather'
+        type: array
+      unit:
+        type: string
+    type: object
+host: localhost:8080
+info:
+  contact: {}
+  description: API для получения прогноза погоды
+  title: Weather API
+  version: "1.0"
+paths:
+  /today:
+    get:
+      description: Возвращает погоду на текущий день
+      parameters:
+      - default: almaty
+        description: Город
+        in: query
+        name: city
+        required: true
+        type: string
+      - default: celsius
+        description: Единицы измерения
+        enum:
+        - celsius
+        - fahrenheit
+        in: query
+        name: unit
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.TodayWeather'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Прогноз погоды на сегодня
+      tags:
+      - Weather
+  /weekly:
+    get:
+      description: Возвращает прогноз погоды на 7 дней
+      parameters:
+      - default: almaty
+        description: Название города
+        in: query
+        name: city
+        required: true
+        type: string
+      - default: celsius
+        description: Единицы измерения
+        enum:
+        - celsius
+        - fahrenheit
+        in: query
+        name: unit
+        type: string
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/model.WeeklyWeather'
+        "400":
+          description: Bad Request
+          schema:
+            additionalProperties:
+              type: string
+            type: object
+      summary: Получить прогноз на неделю
+      tags:
+      - Weather
+swagger: "2.0"
