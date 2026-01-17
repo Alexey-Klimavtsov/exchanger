@@ -16,7 +16,6 @@ func FetchRate(ctx context.Context, from, to string) (Rate, error) {
 	errorChan := make(chan error)
 
 	go func() {
-		// rate := fakeRequest(from, to)
 		rate, err := getRate(ctx, from, to)
 		if err != nil {
 			errorChan <- err
